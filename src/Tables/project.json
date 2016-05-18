@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0-*",
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "frameworks": {
+    "net451": { }
+  },
+  "dependencies": {
+    "EventStore.Client": "3.6.2"
+  }
+}
