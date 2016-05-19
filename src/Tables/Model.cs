@@ -1,17 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tables {
     public class Table {
         public Table(Guid id) {
             Id = id;
             Rows = new List<Row>();
+            Columns = new List<Column>();
         }
 
         public string Name { get; set; }
         public Guid Id { get; private set; }
         public IList<Row> Rows { get; private set; }
+        public IList<Column> Columns { get; private set; }
         public int CurrentVersion { get; set; }
+
+        public void AddRow(Guid id) {
+            var row = new Row(id);
+            foreach (var column in Columns) {
+                row.Cells.Add(new Cell(id, column.Id));
+            }
+
+            Rows.Add(row);
+        }
+
+        public void AddColumn(Guid columnId, string name) {
+            Columns.Add(new Column(columnId) { Name = name });
+
+            foreach (var row in Rows) {
+                row.Cells.Add(new Cell(row.Id, columnId));
+            }
+        }
+
+        public void EditCell(Guid rowId, Guid columnId, object value) {
+            var row = Rows.Single(x => x.Id == rowId);
+            var cell = row.Cells.Single(x => x.ColumnId == columnId);
+
+            cell.Value = value;
+        }
+    }
+
+    public class Column {
+        public Column(Guid id) {
+            Id = id;
+        }
+
+        public Guid Id { get; }
+        public string Name { get; set; }
+
     }
 
     public class Row {
@@ -25,13 +62,13 @@ namespace Tables {
     }
 
     public class Cell {
-        public Cell(Guid rowId, Guid id) {
-            Id = id;
+        public Cell(Guid rowId, Guid columnId) {
+            ColumnId = columnId;
             RowId = rowId;
         }
 
         public Guid RowId { get; private set; }
-        public Guid Id { get; private set; }
-        public string Value { get; set; }
+        public Guid ColumnId { get; private set; }
+        public object Value { get; set; }
     }
 }
