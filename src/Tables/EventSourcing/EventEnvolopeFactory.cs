@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using EventStore.ClientAPI;
 
-namespace Tables
-{
+namespace Tables {
     public class EventEnvolopeFactory {
         private readonly IDictionary<string, IDeserializer> _serializers;
 
@@ -16,11 +16,8 @@ namespace Tables
         public EventEnvolopeFactory() : this(new Dictionary<string, IDeserializer>()) {
         }
 
-        public void AddDeserializer(string eventType, Type clrType) {
-            _serializers.Add(eventType, new StandardDeserializer(eventType, clrType));
-        }
-
-        public void AddDeserializer(Type clrType) {
+        public void AddDefaultSerializer<T>() {
+            var clrType = typeof(T);
             _serializers.Add(clrType.Name, new StandardDeserializer(clrType.Name, clrType));
         }
 
@@ -31,7 +28,16 @@ namespace Tables
                 return false;
             }
 
-            var eventData = serializer.Deserialize(Encoding.UTF8.GetString(@event.Event.Data));
+            var stopWath = Stopwatch.StartNew();
+            var binaryData = Encoding.UTF8.GetString(@event.Event.Data);
+            var elapsedBinary = stopWath.Elapsed;
+            stopWath.Reset();
+  
+            stopWath.Restart();
+            var eventData = serializer.Deserialize(binaryData);
+
+            EventSourcingDiagnostics.DeserializationDiagnostics(stopWath.Elapsed, elapsedBinary);
+
             eventEnvolope = new EventEnvolope(@event.OriginalEventNumber, @event.Event.EventType,
                 @event.Event.EventStreamId, @event.OriginalPosition, eventData);
 

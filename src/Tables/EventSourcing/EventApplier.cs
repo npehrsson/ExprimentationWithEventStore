@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Tables.Controllers {
+namespace Tables {
     public class EventApplier<TState> : IEventApplier<TState> {
         private readonly IDictionary<string, IEventHandler<TState>> _handlers;
 
@@ -17,6 +17,14 @@ namespace Tables.Controllers {
             return _handlers.TryGetValue(eventEnvolope.EventType, out handler) ?
                 handler.Handle(state, eventEnvolope) :
                 state;
+        }
+
+        public void StreamingStopped() {
+            // Batch write or do something else
+        }
+
+        public void LiveStreamStarted() {
+            // Batch write or do something else
         }
     }
 }

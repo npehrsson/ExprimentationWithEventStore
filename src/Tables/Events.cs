@@ -53,18 +53,4 @@ namespace Tables {
         public Guid EventId { get; }
         public string EventType => nameof(CreatedColumnEvent);
     }
-
-    public interface IEventHandler {
-        string EventType { get; }
-        object Handle(object stateContext, EventEnvolope @event);
-    }
-
-    public interface IEventHandler<TState> : IEventHandler {
-        TState Handle(TState stateContext, EventEnvolope @event);
-    }
-
-    public interface IEvent {
-        Guid EventId { get; }
-        string EventType { get; }
-    }
 }

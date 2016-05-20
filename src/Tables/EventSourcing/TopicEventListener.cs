@@ -3,12 +3,12 @@ using EventStore.ClientAPI;
 
 namespace Tables
 {
-    public class TopicEventListener : IDisposable {
+    public class TopicEventListener<T> : IDisposable {
         private readonly EventEnvolopeFactory _eventEnvolopeFactory;
-        private readonly IEventApplier _applier;
+        private readonly IEventApplier<T> _applier;
         private EventStoreAllCatchUpSubscription _subscription;
 
-        public TopicEventListener(EventEnvolopeFactory eventEnvolopeFactory, IEventApplier applier) {
+        public TopicEventListener(EventEnvolopeFactory eventEnvolopeFactory, IEventApplier<T> applier) {
             if (eventEnvolopeFactory == null) throw new ArgumentNullException(nameof(eventEnvolopeFactory));
             _eventEnvolopeFactory = eventEnvolopeFactory;
             _applier = applier;
@@ -16,6 +16,7 @@ namespace Tables
 
         public bool IsRunning => _subscription != null;
         public bool HasLiveStreamStarted { get; private set; }
+        public T State { get; private set; }
 
         public void StartAsync(Position position, IEventStoreConnection connection) {
             if (IsRunning) {
@@ -55,7 +56,7 @@ namespace Tables
                 return;
             }
 
-            _applier.Apply(@event);
+            State = _applier.Apply(State, @event);
         }
 
         public void Dispose() {
